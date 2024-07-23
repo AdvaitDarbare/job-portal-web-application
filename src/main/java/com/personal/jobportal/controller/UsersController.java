@@ -1,5 +1,6 @@
 package com.personal.jobportal.controller;
 
+// Import statements
 import com.personal.jobportal.entity.Users;
 import com.personal.jobportal.entity.UsersType;
 import com.personal.jobportal.services.UsersService;
@@ -20,54 +21,55 @@ import org.springframework.web.bind.annotation.PostMapping;
 import java.util.List;
 import java.util.Optional;
 
-@Controller
+@Controller // Marks this class as a Spring MVC controller
 public class UsersController {
 
     private final UsersTypeService usersTypeService;
     private final UsersService usersService;
 
-    @Autowired
+    @Autowired // Automatically injects the required services
     public UsersController(UsersTypeService usersTypeService, UsersService usersService) {
         this.usersTypeService = usersTypeService;
         this.usersService = usersService;
     }
 
-    @GetMapping("/register")
+    @GetMapping("/register") // Handles GET requests to the "/register" URL
     public String register(Model model) {
-        List<UsersType> usersTypes = usersTypeService.getAll();
-        model.addAttribute("getAllTypes", usersTypes);
-        model.addAttribute("user", new Users());
-        return "register";
+        List<UsersType> usersTypes = usersTypeService.getAll(); // Fetches all user types
+        model.addAttribute("getAllTypes", usersTypes); // Adds the list of user types to the model
+        model.addAttribute("user", new Users()); // Adds a new Users object to the model
+        return "register"; // Returns the "register" view
     }
 
-    @PostMapping("/register/new")
+    @PostMapping("/register/new") // Handles POST requests to the "/register/new" URL
     public String userRegistration(@Valid Users users, Model model) {
-        Optional<Users> optionalUsers = usersService.getUserByEmail(users.getEmail());
+        Optional<Users> optionalUsers = usersService.getUserByEmail(users.getEmail()); // Checks if the user already exists by email
         if (optionalUsers.isPresent()) {
-            model.addAttribute("error", "Email already registered,try to login or register with other email.");
-            List<UsersType> usersTypes = usersTypeService.getAll();
-            model.addAttribute("getAllTypes", usersTypes);
-            model.addAttribute("user", new Users());
-            return "register";
+            // Checks if an Optional containing a Users object is present, meaning a user with the provided email already exists.
+            model.addAttribute("error", "Email already registered,try to login or register with other email."); // Adds an error message to the model
+            List<UsersType> usersTypes = usersTypeService.getAll(); // Fetches all user types
+            model.addAttribute("getAllTypes", usersTypes); // Adds the list of user types to the model
+            model.addAttribute("user", new Users()); // Adds a new Users object to the model
+            return "register"; // Returns the "register" view
         }
-        usersService.addNew(users);
-        return "redirect:/dashboard/";
+        usersService.addNew(users); // Adds the new user to the database
+        return "redirect:/dashboard/"; // Redirects to the dashboard
     }
 
-    @GetMapping("/login")
+    @GetMapping("/login") // Handles GET requests to the "/login" URL
     public String login() {
-        return "login";
+        return "login"; // Returns the "login" view
     }
 
-    @GetMapping("/logout")
+    @GetMapping("/logout") // Handles GET requests to the "/logout" URL
     public String logout(HttpServletRequest request, HttpServletResponse response) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication(); // Gets the current authentication
 
         if (authentication != null) {
-            new SecurityContextLogoutHandler().logout(request, response, authentication);
+            new SecurityContextLogoutHandler().logout(request, response, authentication); // Logs out the user
         }
 
-        return "redirect:/";
+        return "redirect:/"; // Redirects to the home page
     }
 }
